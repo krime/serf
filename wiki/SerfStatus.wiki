@@ -63,6 +63,8 @@ they _should_.
   * Go through design-guide.txt; create a detailed 'walking tour' of serf.
   * Add a higher-level, more dev-friendly API.
     * See Subversion's {{{ra_serf}}} for an example of how this might be done.
+    * Add an Authentication Abstraction/Utility functions
+      * Support for Digest 
   * Add a bit of polish to serfmake script.
 
 = Issues on the backburner (for now) =
