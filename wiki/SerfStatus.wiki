@@ -9,20 +9,19 @@
 
 = Release Showstoppers =
 
-== A better way to control debug checks ==
-
-They are too expensive to do in a release build by default and changes
-the external ABI.  We can just duck it and hard code the checks to be
-disabled by default and require manual editing of serf.h to enable
-them.
+None at this time.
 
 == Polish ==
 
   * Publish doxygen docs on website.
-  * Create a quick howto that covers installation.
-  * Issue a packaged release for easier consuming.
 
 = Open Issues =
+
+== A better way to control debug checks ==
+
+They are too expensive to do in a release build by default and changes
+the external ABI.  We currently disable them by default and require
+manual editing of serf.h to enable them.
 
 == Stream Metadata ==
 
