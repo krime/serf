@@ -1,11 +1,11 @@
 #summary Showstoppers, open issues and long-term goals
 #labels Featured,Phase-Design
 
-  * *Site*: http://code.google.com/p/serf/
-  * *Code*: http://serf.googlecode.com/svn/
+  * *Site* : http://code.google.com/p/serf/
+  * *Code*  : http://serf.googlecode.com/svn/
   * *Issues*: http://code.google.com/p/serf/issues/list
-  * *Mail*: [http://groups-beta.google.com/group/serf-dev serf-dev@googlegroups.com]
-  * *People*: Justin Erenkrantz, Greg Stein
+  * *Mail* : [http://groups-beta.google.com/group/serf-dev serf-dev@googlegroups.com]
+  * *People* : Justin Erenkrantz, Greg Stein
 
 = Release Showstoppers =
 
