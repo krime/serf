@@ -1,0 +1,4 @@
+#summary Diagram that shows the relation between the serf context, buckets and the application.
+
+I'll add a link to the svg/png file here.
+
