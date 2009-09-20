@@ -29,8 +29,6 @@ typedef struct {
 
     /* Marks if a snapshot is set. */
     int snapshot; 
-    serf_bucket_aggregate_eof_t hold_open;
-    void *hold_open_baton;
 } aggregate_context_t;
 
 
@@ -66,8 +64,6 @@ SERF_DECLARE(serf_bucket_t *) serf_bucket_aggregate_create(
     ctx->list = NULL;
     ctx->done = NULL;
     ctx->snapshot = 0;
-    ctx->hold_open = NULL;
-    ctx->hold_open_baton = NULL;
 
     return serf_bucket_create(&serf_bucket_type_aggregate, allocator, ctx);
 }
@@ -96,9 +92,7 @@ SERF_DECLARE(void) serf_bucket_aggregate_become(serf_bucket_t *bucket)
     ctx->list = NULL;
     ctx->done = NULL;
     ctx->snapshot = 0;
-    ctx->hold_open = NULL;
-    ctx->hold_open_baton = NULL;
-  
+
     bucket->type = &serf_bucket_type_aggregate;
     bucket->data = ctx;
 
@@ -147,15 +141,6 @@ SERF_DECLARE(void) serf_bucket_aggregate_append(
             scan = scan->next;
         scan->next = new_list;
     }
-}
-
-SERF_DECLARE(void) serf_bucket_aggregate_hold_open(serf_bucket_t *aggregate_bucket, 
-                                                   serf_bucket_aggregate_eof_t fn,
-                                                   void *baton)
-{
-    aggregate_context_t *ctx = aggregate_bucket->data;
-    ctx->hold_open = fn;
-    ctx->hold_open_baton = baton;
 }
 
 SERF_DECLARE(void) serf_bucket_aggregate_prepend_iovec(
@@ -210,12 +195,7 @@ static apr_status_t read_aggregate(serf_bucket_t *bucket,
     *vecs_used = 0;
 
     if (!ctx->list) {
-        if (ctx->hold_open) {
-            return ctx->hold_open(ctx->hold_open_baton, bucket);
-        }
-        else {
-            return APR_EOF;
-        }
+        return APR_EOF;
     }
 
     while (1) {
@@ -255,12 +235,7 @@ static apr_status_t read_aggregate(serf_bucket_t *bucket,
 
             /* If we have no more in our list, return EOF. */
             if (!ctx->list) {
-                if (ctx->hold_open) {
-                    return ctx->hold_open(ctx->hold_open_baton, bucket);
-                }
-                else {
-                    return APR_EOF;
-                }
+                return status;
             }
 
             /* At this point, it safe to read the next bucket - if we can. */

@@ -140,12 +140,6 @@ SERF_DECLARE(void) serf_bucket_aggregate_append(
     serf_bucket_t *aggregate_bucket,
     serf_bucket_t *append_bucket);
 
-typedef apr_status_t (*serf_bucket_aggregate_eof_t)(void *baton, serf_bucket_t *aggregate_bucket);
-    
-SERF_DECLARE(void) serf_bucket_aggregate_hold_open(serf_bucket_t *aggregate_bucket,
-                                                   serf_bucket_aggregate_eof_t fn,
-                                                   void *baton);
-
 SERF_DECLARE(void) serf_bucket_aggregate_prepend_iovec(
     serf_bucket_t *aggregate_bucket,
     struct iovec *vecs,
@@ -316,11 +310,6 @@ typedef int (serf_bucket_headers_do_callback_fn_t)(
     const char *value);
 
 /**
- * Iterates over all headers of the message and invokes the callback 
- * function with header key and value. Stop iterating when no more
- * headers are available or when the callback function returned a 
- * non-0 value.
- *
  * @param headers_bucket headers to iterate over
  * @param func callback routine to invoke for every header in the bucket
  * @param baton baton to pass on each invocation to func

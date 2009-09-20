@@ -44,9 +44,6 @@ typedef struct serf_bucket_type_t serf_bucket_type_t;
 typedef struct serf_bucket_alloc_t serf_bucket_alloc_t;
 
 typedef struct serf_connection_t serf_connection_t;
-typedef struct serf_listener_t serf_listener_t;
-typedef struct serf_incoming_t serf_incoming_t;
-typedef struct serf_incoming_request_t serf_incoming_request_t;
 
 typedef struct serf_request_t serf_request_t;
 
@@ -201,14 +198,12 @@ SERF_DECLARE(void) serf_context_set_progress_cb(
  * ### callback. it may be wasteful to create a per-conn allocator, so this
  * ### baton-based, app-responsible form might be best.
  *
- * Responsibility for the buckets is passed to the serf library. They will be
+ * Responsibility for the bucket is passed to the serf library. It will be
  * destroyed when the connection is closed.
  *
  * All temporary allocations should be made in @a pool.
  */
-typedef apr_status_t (*serf_connection_setup_t)(apr_socket_t *skt,
-                                                   serf_bucket_t **read_bkt,
-                                                   serf_bucket_t **write_bkt,
+typedef serf_bucket_t * (*serf_connection_setup_t)(apr_socket_t *skt,
                                                    void *setup_baton,
                                                    apr_pool_t *pool);
 
@@ -357,38 +352,6 @@ SERF_DECLARE(apr_status_t) serf_connection_create2(
     serf_connection_closed_t closed,
     void *closed_baton,
     apr_pool_t *pool);
-
-
-typedef apr_status_t (*serf_accept_client_t)(serf_context_t *ctx, 
-                                        serf_listener_t *l,
-                                        void *accept_baton,
-                                        apr_socket_t *insock,
-                                        apr_pool_t *pool);
-                                         
-SERF_DECLARE(apr_status_t) serf_listener_create(
-    serf_listener_t **listener,
-    serf_context_t *ctx,
-    const char *host,
-    apr_uint16_t port,
-    void *accept_baton,
-    serf_accept_client_t accept,
-    apr_pool_t *pool);
-
-typedef apr_status_t (*serf_incoming_request_cb_t)(serf_context_t *ctx,
-                                        serf_incoming_request_t *req,
-                                        void *request_baton,
-                                        apr_pool_t *pool);
-
-SERF_DECLARE(apr_status_t) serf_incoming_create(
-    serf_incoming_t **client,
-    serf_context_t *ctx,
-    apr_socket_t *insock,
-    void *request_baton,
-    serf_incoming_request_cb_t request,
-    apr_pool_t *pool);
-
-
-
 
 /**
  * Reset the connection, but re-open the socket again.
@@ -947,7 +910,7 @@ SERF_DECLARE(void) serf_debug__bucket_alloc_check(serf_bucket_alloc_t *allocator
 /* Version info */
 #define SERF_MAJOR_VERSION 0
 #define SERF_MINOR_VERSION 3
-#define SERF_PATCH_VERSION 1
+#define SERF_PATCH_VERSION 0
 
 /* Version number string */
 #define SERF_VERSION_STRING APR_STRINGIFY(SERF_MAJOR_VERSION) "." \

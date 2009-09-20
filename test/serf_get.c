@@ -41,16 +41,7 @@ static void closed_connection(serf_connection_t *conn,
     }
 }
 
-static apr_status_t ignore_all_cert_errors(void *data, int failures,
-                                           const serf_ssl_certificate_t *cert)
-{
-    /* In a real application, you would normally would not want to do this */
-    return APR_SUCCESS;
-}
-
-static apr_status_t conn_setup(apr_socket_t *skt,
-                                serf_bucket_t **input_bkt,
-                                serf_bucket_t **output_bkt,
+static serf_bucket_t* conn_setup(apr_socket_t *skt,
                                 void *setup_baton,
                                 apr_pool_t *pool)
 {
@@ -63,15 +54,9 @@ static apr_status_t conn_setup(apr_socket_t *skt,
         if (!ctx->ssl_ctx) {
             ctx->ssl_ctx = serf_bucket_ssl_decrypt_context_get(c);
         }
-        serf_ssl_server_cert_callback_set(ctx->ssl_ctx, ignore_all_cert_errors, NULL);
-
-        *output_bkt = serf_bucket_ssl_encrypt_create(*output_bkt, ctx->ssl_ctx,
-                                                    ctx->bkt_alloc);
     }
 
-    *input_bkt = c;
-
-    return APR_SUCCESS;
+    return c;
 }
 
 static serf_bucket_t* accept_response(serf_request_t *request,
@@ -129,13 +114,12 @@ static apr_status_t handle_response(serf_request_t *request,
     apr_status_t status;
     handler_baton_t *ctx = handler_baton;
 
-    if (!response) {
-        /* A NULL response can come back if the request failed completely */
-        return APR_EGENERAL;
-    }
     status = serf_bucket_response_status(response, &sl);
     if (status) {
-        return status;
+        if (APR_STATUS_IS_EAGAIN(status)) {
+            return status;
+        }
+        abort();
     }
 
     while (1) {
@@ -226,6 +210,26 @@ static apr_status_t setup_request(serf_request_t *request,
 
     apr_atomic_inc32(&(ctx->requests_outstanding));
 
+    if (ctx->acceptor_baton->using_ssl) {
+        serf_bucket_alloc_t *req_alloc;
+        app_baton_t *app_ctx = ctx->acceptor_baton;
+
+        req_alloc = serf_request_get_alloc(request);
+
+        if (app_ctx->ssl_ctx == NULL) {
+            *req_bkt =
+                serf_bucket_ssl_encrypt_create(*req_bkt, NULL,
+                                               app_ctx->bkt_alloc);
+            app_ctx->ssl_ctx =
+                serf_bucket_ssl_encrypt_context_get(*req_bkt);
+        }
+        else {
+            *req_bkt =
+                serf_bucket_ssl_encrypt_create(*req_bkt, app_ctx->ssl_ctx,
+                                               app_ctx->bkt_alloc);
+        }
+    }
+
     *acceptor = ctx->acceptor;
     *acceptor_baton = ctx->acceptor_baton;
     *handler = ctx->handler;
@@ -270,6 +274,7 @@ int main(int argc, const char **argv)
     atexit(apr_terminate);
 
     apr_pool_create(&pool, NULL);
+    apr_atomic_init(pool);
     /* serf_initialize(); */
 
     /* Default to one round of fetching. */
@@ -350,7 +355,6 @@ int main(int argc, const char **argv)
                                    pool);
     if (status) {
         printf("Error creating address: %d\n", status);
-        apr_pool_destroy(pool);
         exit(1);
     }
 
@@ -393,7 +397,6 @@ int main(int argc, const char **argv)
 
             printf("Error running context: (%d) %s\n", status,
                    apr_strerror(status, buf, sizeof(buf)));
-            apr_pool_destroy(pool);
             exit(1);
         }
         if (!apr_atomic_read32(&handler_ctx.requests_outstanding)) {

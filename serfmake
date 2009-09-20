@@ -15,8 +15,6 @@ FILES_HDR = [
 
 LIB_FILES = [
   ('.', 'context'),
-  ('.', 'incoming'),
-  ('.', 'outgoing'),
 
   ('buckets', 'aggregate_buckets'),
   ('buckets', 'request_buckets'),
@@ -164,10 +162,10 @@ def cmd_clean(param):
 
 class Builder:
   def __init__(self, params):
-    if 'apr' in params:
+    try:
       self.apr = APRConfig(params['apr'])
       self.apu = APUConfig(params['apr'])
-    else:
+    except:
       self.apr = APRConfig(None)
       self.apu = APUConfig(None)
 
@@ -331,11 +329,9 @@ class ConfigScript(object):
 
   def __init__(self, search_dir):
     if search_dir:
-      locations = [search_dir, os.path.join(search_dir, 'bin')]
-    else:
-      locations = self.locations
-
-    for dirname in locations:
+      self.locations.append(search_dir)
+      self.locations.append(os.path.join(search_dir, 'bin'))
+    for dirname in self.locations:
       bin = os.path.join(dirname, self.script_name)
       if os.access(bin, os.X_OK):
         self.bin = bin
