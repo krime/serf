@@ -155,3 +155,7 @@ it will manage them properly.
 
 Maybe pass this allocator to the connection setup callback, similar to
 the acceptor. "put the stream bucket in *this* allocator."
+
+== Future Work ==
+
+SPDY -- http://dev.chromium.org/spdy/spdy-whitepaper
