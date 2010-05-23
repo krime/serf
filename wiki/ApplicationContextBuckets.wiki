@@ -1,6 +1,6 @@
 #summary Diagram that shows the relation between the serf context, buckets and the application.
 
-This diagram shows what's going on in serf_context_run.
+This diagram shows what's going on in serf_context_run, for serf <= 0.3.1.
 
 Also available in SVG format: http://serf.googlecode.com/svn/wiki/serf-context-buckets.svg
 
