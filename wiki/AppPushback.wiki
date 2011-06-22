@@ -20,7 +20,7 @@ In `ra_serf`, the network code reads from the server as fast as it arrives. Ther
 
 Lieven noted that it would be ideal to save the *deflated* content. This is a great insight, but also implies ramifications on the network stack. The application could manage the content-saving from within the response handler, but to save the deflated content is somewhere within the bucket chain.
 
-My initial thought is to add an API to the buckets, let's call it `pushback`. Most buckets cannot do anything with this function, but within the bucket stack (say, between the inflate and dechunk buckets) there would be a "content saver" bucket. That saver bucket would hold content in memory, or spill to disk, according to instructions at creation time.
+My initial thought is to add an API to the buckets, let's call it `pushback`. Most buckets cannot do anything with this function, but within the bucket stack (say, between the inflate and dechunk buckets) there would be a "content saver" bucket. That saver bucket would hold content in memory, or spill to disk, according to instructions at creation time. The saver would continue to hold content until a bucket `read` arrived. Note that "somehow" the saver bucket needs to be called by serf's network stack to read from its interior bucket (e.g a dechunk, ssl, or socket bucket, typically). This implies some new connection between the network internals and the bucket managing the pushback request.
 
 The debugging infrastructure would need to change, since it attempts to verify that response handlers read until `EAGAIN` is reached. Calling `pushback` would need to be an acceptable alternative.
 
