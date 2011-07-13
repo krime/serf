@@ -13,9 +13,37 @@ None at this time.
 
 = Release Nice-to-haves =
 
-== Polish ==
+=== Polish ===
 
   * Publish doxygen docs on website.
+
+= Version 2.0 =
+
+=== Switch to SCons ===
+
+_more info goes here_
+
+See [http://code.google.com/p/serf/issues/list?can=2&q=label%3Ascons open issues] that should be considered during the SCons work.
+
+=== Switch to PoCore ===
+
+_more info goes here_
+
+See [http://code.google.com/p/pocore/ PoCore]
+
+=== Connection Types ===
+
+_more info goes here_
+
+=== Request Manager ===
+
+_more info goes here_
+
+= NEEDS UPDATE =
+
+Pretty much everything below here needs a review, update, and/or deletion.
+
+----
 
 = Open Issues =
 
